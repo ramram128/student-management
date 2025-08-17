@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Students List</title>
+</head>
+<body>
+  <h1>Students</h1>
+  <ul>
+    {% for student in students %}
+      <li>{{ student[1] }} ({{ student[2] }})</li>
+    {% endfor %}
+  </ul>
+  <br>
+  <a href="/">Back</a>
+</body>
+</html>
