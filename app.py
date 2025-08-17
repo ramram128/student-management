@@ -1,52 +1,50 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, session, jsonify, url_for
 import psycopg2
 import os
 
 app = Flask(__name__)
+app.secret_key = "supersecretkey"  # required for session
 
-# Get database URL from environment variables
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
 def get_db_connection():
     return psycopg2.connect(DATABASE_URL)
 
-# Create table if not exists
-with get_db_connection() as conn:
-    with conn.cursor() as cur:
-        cur.execute("""
-            CREATE TABLE IF NOT EXISTS students (
-                id SERIAL PRIMARY KEY,
-                name TEXT NOT NULL,
-                email TEXT NOT NULL UNIQUE
-            )
-        """)
-        conn.commit()
-
-@app.route('/')
+@app.route("/")
 def index():
-    return render_template('index.html')
+    return render_template("index.html")  # login page
 
-@app.route('/students')
-def show_students():
+@app.route("/login", methods=["POST"])
+def login():
+    username = request.form["username"]
+    password = request.form["password"]
+
     conn = get_db_connection()
     cur = conn.cursor()
-    cur.execute("SELECT id, name, email FROM students ORDER BY id")
-    students = cur.fetchall()
+    cur.execute("SELECT id, username, password, role FROM users WHERE username=%s", (username,))
+    user = cur.fetchone()
     cur.close()
     conn.close()
-    return render_template('students.html', students=students)
 
-@app.route('/add', methods=['POST'])
-def add_student():
-    name = request.form['name']
-    email = request.form['email']
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute("INSERT INTO students (name, email) VALUES (%s, %s)", (name, email))
-    conn.commit()
-    cur.close()
-    conn.close()
-    return redirect('/students')
+    if user and user[2] == password:  # (later we’ll hash password for security)
+        session["user_id"] = user[0]
+        session["role"] = user[3]
 
-if __name__ == '__main__':
-    app.run()
+        if user[3] == "student":
+            return redirect(url_for("student_dashboard"))
+        elif user[3] == "lecturer":
+            return redirect(url_for("lecturer_dashboard"))
+    else:
+        return "Invalid username or password", 401
+
+@app.route("/student-dashboard")
+def student_dashboard():
+    if session.get("role") == "student":
+        return "Welcome Student Dashboard!"
+    return redirect("/")
+
+@app.route("/lecturer-dashboard")
+def lecturer_dashboard():
+    if session.get("role") == "lecturer":
+        return "Welcome Lecturer Dashboard!"
+    return redirect("/")
