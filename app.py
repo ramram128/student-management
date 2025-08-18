@@ -37,14 +37,14 @@ def login():
     else:
         return "Invalid username or password", 401
 
-@app.route("/student-dashboard")
+@app.route("/student_dashboard")
 def student_dashboard():
-    if session.get("role") == "student":
-        return "Welcome Student Dashboard!"
-    return redirect("/")
+    if "role" in session and session["role"] == "student":
+        return render_template("student.html")
+    return redirect(url_for("login"))
 
-@app.route("/lecturer-dashboard")
+@app.route("/lecturer_dashboard")
 def lecturer_dashboard():
-    if session.get("role") == "lecturer":
-        return "Welcome Lecturer Dashboard!"
-    return redirect("/")
+    if "role" in session and session["role"] == "lecturer":
+        return render_template("lecturer.html")
+    return redirect(url_for("login"))
