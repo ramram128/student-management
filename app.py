@@ -58,27 +58,63 @@ def update_student_page():
 @app.route("/update_student", methods=["POST"])
 def update_student():
     if "role" in session and session["role"] == "student":
-        name = request.form["name"]
-        email = request.form["email"]
-        phone = request.form["phone"]
-        password = request.form["password"]
+        try:
+            # collect form inputs
+            fields = {
+                "fullname": request.form.get("name"),
+                "email": request.form.get("email"),
+                "phone": request.form.get("phone"),
+                "cgpa": request.form.get("cgpa"),
+                "aadhar": request.form.get("aadhar"),
+                "pan": request.form.get("pan"),
+                "address": request.form.get("address"),
+                "parent_mobile": request.form.get("parent_mobile")
+            }
 
-        conn = get_db_connection()
-        cur = conn.cursor()
-        if password:  # update password only if provided
-            cur.execute(
-                "UPDATE users SET username=%s, email=%s, phone=%s, password=%s WHERE id=%s",
-                (name, email, phone, password, session["user_id"])
-            )
-        else:
-            cur.execute(
-                "UPDATE users SET username=%s, email=%s, phone=%s WHERE id=%s",
-                (name, email, phone, session["user_id"])
-            )
-        conn.commit()
-        cur.close()
-        conn.close()
+            # filter out empty values (None or "")
+            updates = {k: v for k, v in fields.items() if v and v.strip()}
 
-        return "Details updated successfully!"
+            if not updates:
+                return "No details provided to update!", 400
+
+            conn = get_db_connection()
+            cur = conn.cursor()
+
+            # build SET clause dynamically
+            set_clause = ", ".join([f"{k}=%s" for k in updates.keys()])
+            values = list(updates.values()) + [session["user_id"]]
+
+            cur.execute(f"""
+                INSERT INTO student_details (user_id, {", ".join(updates.keys())})
+                VALUES (%s, {", ".join(["%s"] * len(updates))})
+                ON CONFLICT (user_id) DO UPDATE
+                SET {set_clause}
+            """, [session["user_id"]] + list(updates.values()) + list(updates.values()))
+
+            conn.commit()
+            cur.close()
+            conn.close()
+
+            return "Details updated successfully!"
+
+        except Exception as e:
+            return f"Error while updating: {str(e)}", 500
+
     return redirect(url_for("login"))
+
+
+@app.route("/view_details")
+def view_details():
+    if "user_id" not in session:
+        return redirect(url_for("index"))
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT fullname, email, phone, cgpa, aadhar, pan, address, parent_mobile FROM student_details WHERE user_id = %s", (session["user_id"],))
+    details = cur.fetchone()
+    cur.close()
+    conn.close()
+
+    return render_template("student_view.html", details=details)
+
 

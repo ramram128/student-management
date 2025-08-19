@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Details</title>
+</head>
+<body>
+    <h2>My Details</h2>
+
+    {% if details %}
+        <p><b>Full Name:</b> {{ details[0] }}</p>
+        <p><b>Email:</b> {{ details[1] }}</p>
+        <p><b>Phone:</b> {{ details[2] }}</p>
+        <p><b>CGPA:</b> {{ details[3] }}</p>
+        <p><b>Aadhar:</b> {{ details[4] }}</p>
+        <p><b>PAN:</b> {{ details[5] }}</p>
+        <p><b>Address:</b> {{ details[6] }}</p>
+        <p><b>Parent Mobile:</b> {{ details[7] }}</p>
+    {% else %}
+        <p>You have not updated your details yet.</p>
+    {% endif %}
+
+    <a href="{{ url_for('student_dashboard') }}">⬅ Back to Dashboard</a>
+</body>
+</html>
