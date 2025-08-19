@@ -21,7 +21,7 @@ def login():
 
     conn = get_db_connection()
     cur = conn.cursor()
-    cur.execute("SELECT id, username, password, role FROM users WHERE username=%s", (username,))
+    cur.execute("SELECT id, username, password, role FROM students WHERE username=%s", (username,))
     user = cur.fetchone()
     cur.close()
     conn.close()
