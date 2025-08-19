@@ -2,12 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Student Page</title>
+  <title>Student Dashboard</title>
 </head>
 <body>
   <h1>Welcome Student</h1>
   <p>This page will later show student options (e.g., view attendance, profile).</p>
 
-  <a href="index.html">⬅ Back to Home</a>
+  <!-- Button to go to update page -->
+  <form action="{{ url_for('update_student_page') }}" method="GET">
+    <button type="submit">Update My Details</button>
+  </form>
+
+  <br>
+  <a href="{{ url_for('index') }}">⬅ Back to Home</a>
 </body>
 </html>

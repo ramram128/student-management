@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Update Student Details</title>
+</head>
+<body>
+  <h1>Update Your Details</h1>
+
+  <form action="{{ url_for('update_student') }}" method="POST">
+    <label for="name">Full Name:</label><br>
+    <input type="text" id="name" name="name" required><br><br>
+
+    <label for="email">Email:</label><br>
+    <input type="email" id="email" name="email" required><br><br>
+
+    <label for="phone">Phone:</label><br>
+    <input type="text" id="phone" name="phone" required><br><br>
+
+    <label for="password">New Password:</label><br>
+    <input type="password" id="password" name="password"><br><br>
+
+    <button type="submit">Save Changes</button>
+  </form>
+
+  <br>
+  <a href="{{ url_for('student_dashboard') }}">⬅ Back to Dashboard</a>
+</body>
+</html>

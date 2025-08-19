@@ -48,3 +48,37 @@ def lecturer_dashboard():
     if "role" in session and session["role"] == "lecturer":
         return render_template("lecturer.html")
     return redirect(url_for("login"))
+
+@app.route("/update_student_page")
+def update_student_page():
+    if "role" in session and session["role"] == "student":
+        return render_template("update_student.html")
+    return redirect(url_for("login"))
+
+@app.route("/update_student", methods=["POST"])
+def update_student():
+    if "role" in session and session["role"] == "student":
+        name = request.form["name"]
+        email = request.form["email"]
+        phone = request.form["phone"]
+        password = request.form["password"]
+
+        conn = get_db_connection()
+        cur = conn.cursor()
+        if password:  # update password only if provided
+            cur.execute(
+                "UPDATE users SET username=%s, email=%s, phone=%s, password=%s WHERE id=%s",
+                (name, email, phone, password, session["user_id"])
+            )
+        else:
+            cur.execute(
+                "UPDATE users SET username=%s, email=%s, phone=%s WHERE id=%s",
+                (name, email, phone, session["user_id"])
+            )
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        return "Details updated successfully!"
+    return redirect(url_for("login"))
+
